@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "common.h"
+#include "compiler.h"
 #include "debug.h"
 #include "vm.h"
 
@@ -15,12 +16,6 @@ void initVM() {
 }
 
 void freeVM() {
-}
-
-void negate() {
-  vm.stackTop--;
-  *vm.stackTop = - *vm.stackTop;
-  vm.stackTop++;
 }
 
 void push(Value value) {
@@ -66,7 +61,7 @@ static InterpretResult run() {
       case OP_SUBSTRACT: BINARY_OP(-); break;
       case OP_MULTIPLY:  BINARY_OP(*); break;
       case OP_DIVIDE:    BINARY_OP(/); break;
-      case OP_NEGATE: negate(); break;
+      case OP_NEGATE: push(-pop()); break;
       case OP_RETURN: {
         printValue(pop());
         printf("\n");
@@ -80,8 +75,7 @@ static InterpretResult run() {
   #undef BINARY_OP
 }
 
-InterpretResult interpret(Chunk* chunk) {
-  vm.chunk = chunk;
-  vm.ip = vm.chunk->code;
-  return run();
+InterpretResult interpret(const char* source) {
+  compile(source);
+  return INTERPRET_OK;
 }
